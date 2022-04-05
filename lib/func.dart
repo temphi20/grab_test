@@ -6,8 +6,8 @@ import 'package:ffi/ffi.dart';
 final DynamicLibrary func = DynamicLibrary.open('func.dll');
 
 // Uint8ClampedList
-final void Function(Pointer<Uint8>) grapTest = func
-    .lookup<NativeFunction<Void Function(Pointer<Uint8>)>>('grap_test')
+final void Function(Pointer<Uint8>) grabTest = func
+    .lookup<NativeFunction<Void Function(Pointer<Uint8>)>>('grab_test')
     .asFunction();
 
 

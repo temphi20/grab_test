@@ -28,6 +28,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   ffi: ^1.1.2
+  file_picker: ^4.5.1
   fluent_ui: ^3.9.1
   flutter:
     sdk: flutter

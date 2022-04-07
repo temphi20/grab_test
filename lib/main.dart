@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'bmp_header.dart';
@@ -174,11 +175,16 @@ class _MyHomePageState extends State<MyHomePage> {
   UI.Image? image;
   int i = 0;
 
-  void test() {
-    final Pointer<Uint8> ptr = calloc.allocate(1);
-    kPrint(ptr.asTypedList(1));
-    ptr.asTypedList(1)[0] = 1;
-    kPrint(ptr.asTypedList(1));
+  @override
+  void initState() {
+    initialize();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    terminate();
+    super.dispose();
   }
 
   void grap() async {
@@ -247,6 +253,58 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  static int callback(Pointer<Uint8> result) {
+    kPrint('success callback');
+    // kPrint(uintPtr);
+    final MemoryImage memoryImage = MemoryImage(
+        BMPHeader(2592, 2048).appendBitmap(result.asTypedList(2592 * 2048)));
+
+    kPrint('memory image succeed');
+    // String? output = await FilePicker.platform.saveFile();
+    // if (output != null) {
+    //   IO.File('$output-row').writeAsBytes(result.asTypedList(2592 * 2048));
+    //   IO.File(output).writeAsBytes(memoryImage.bytes);
+    // }
+    setState(() {
+      try {
+        kPrint('in setState');
+
+        // kPrint(memoryImage.bytes);
+        ulist = memoryImage.bytes;
+        // UI.Codec codec =
+        //     await UI.instantiateImageCodec(result.asTypedList(2592 * 2048));
+        // kPrint('codec succeed');
+        // UI.FrameInfo frame = await codec.getNextFrame();
+        // kPrint('frame succeed');
+        // image = frame.image;
+        // kPrint('image succeed');
+
+        // base
+        // File.fromRawPath(result.asTypedList(2592 * 2048)).wr;
+        // ulist = result.asTypedList(2592 * 2048);
+      } catch (e) {
+        kPrint(e);
+      }
+    });
+    return 0;
+  }
+
+  static void _grabCall(_) {
+    setCallback(
+        Pointer.fromFunction<IntPtr Function(Pointer<Uint8>)>(callback, 0));
+    kPrint('set callback end');
+    grabCall();
+  }
+
+  void call() async {
+    try {
+      await compute(_grabCall, null);
+      kPrint('callback end');
+    } catch (e) {
+      kPrint(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -261,7 +319,11 @@ class _MyHomePageState extends State<MyHomePage> {
           controller: ScrollController(),
           physics: const ScrollPhysics(),
           children: <Widget>[
-            TextButton(onPressed: test, child: const Text('TEST')),
+            TextButton(onPressed: initialize, child: const Text('INITIALIZE')),
+            TextButton(onPressed: terminate, child: const Text('TERMINATE')),
+            TextButton(onPressed: stop, child: const Text('STOP')),
+            TextButton(onPressed: close, child: const Text('CLOSE')),
+            TextButton(onPressed: call, child: const Text('CALLBACK TEST')),
             TextButton(onPressed: grap, child: const Text('GRAB TEST')),
             if (ulist != null)
               SizedBox(

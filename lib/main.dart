@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
 
 late Isolate isolate;
 late SendPort sendPort;
+late Timer timer;
 bool isStop = false;
 
 // int callback(Pointer<Uint8> result) {
@@ -124,6 +125,7 @@ class MyHomePage extends StatelessWidget {
 
     setCallback(
         Pointer.fromFunction<IntPtr Function(Pointer<Uint8>)>(callback, 0));
+
     // setCallback(Pointer.fromFunction<IntPtr Function(Pointer<Uint8>)>(
     //     (Pointer<Uint8> result) {
     //   kPrint('success callback');
@@ -137,6 +139,9 @@ class MyHomePage extends StatelessWidget {
     // }, 0));
     kPrint('set callback end');
     grabCall();
+    timer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      sPort.send(message);
+    });
 
     rPort.listen((val) {
       kPrint(val);
@@ -144,7 +149,7 @@ class MyHomePage extends StatelessWidget {
   }
 
   static void isolateStop() {
-    isStop = true;
+    // timer.cancel();
     stop();
     isolate.kill(priority: Isolate.immediate);
   }

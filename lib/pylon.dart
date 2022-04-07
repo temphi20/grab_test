@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class Pylon with ChangeNotifier {
-  static Pylon on(BuildContext context) => Provider.of<Pylon>(context);
+  static Pylon on(BuildContext context) =>
+      Provider.of<Pylon>(context, listen: true);
   static Pylon of(BuildContext context) =>
       Provider.of<Pylon>(context, listen: false);
   Uint8List? imageUList;

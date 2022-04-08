@@ -9,7 +9,7 @@ class Pylon with ChangeNotifier {
       Provider.of<Pylon>(context, listen: true);
   static Pylon of(BuildContext context) =>
       Provider.of<Pylon>(context, listen: false);
-  Uint8List? imageUList;
+  Uint8List imageUList = Uint8List(1);
 
   void imageUpdate(Uint8List bData) {
     imageUList = bData;
@@ -17,7 +17,7 @@ class Pylon with ChangeNotifier {
   }
 
   void imageTerminate() {
-    imageUList = null;
+    imageUList = Uint8List(1);
     notifyListeners(); //must be inserted
   }
 }

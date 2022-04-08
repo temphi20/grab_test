@@ -19,19 +19,11 @@ final void Function() close =
 final void Function() stop =
     func.lookup<NativeFunction<Void Function()>>('stop').asFunction();
 
-final void Function() grabCall =
-    func.lookup<NativeFunction<Void Function()>>('grab_call').asFunction();
-final void Function() grabCallAsync = func
-    .lookup<NativeFunction<Void Function()>>('grab_call_async')
+final void Function() grabSync =
+    func.lookup<NativeFunction<Void Function()>>('grab_sync').asFunction();
+final void Function(Pointer<Uint8>) getResult = func
+    .lookup<NativeFunction<Void Function(Pointer<Uint8>)>>('get_result')
     .asFunction();
-// final void Function(int) testFunc =
-//     func.lookup<NativeFunction<Void Function(Int32)>>('test').asFunction();
-final void Function(Pointer<NativeFunction<IntPtr Function(Pointer<Uint8>)>>)
-    setCallback = func
-        .lookup<
-                NativeFunction<
-                    Void Function(
-                        Pointer<
-                            NativeFunction<IntPtr Function(Pointer<Uint8>)>>)>>(
-            'SetCallbackFunction')
-        .asFunction();
+final Pointer<Uint8> Function() getResultGlobal = func
+    .lookup<NativeFunction<Pointer<Uint8> Function()>>('get_result_global')
+    .asFunction();

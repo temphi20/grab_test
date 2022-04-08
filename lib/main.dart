@@ -138,10 +138,11 @@ class MyHomePage extends StatelessWidget {
     //   return 0;
     // }, 0));
     kPrint('set callback end');
-    grabCall();
-    timer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      sPort.send(message);
-    });
+    grabCallAsync();
+    // grabCall();
+    // timer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+    //   sPort.send(message);
+    // });
 
     rPort.listen((val) {
       kPrint(val);

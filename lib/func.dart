@@ -21,6 +21,9 @@ final void Function() stop =
 
 final void Function() grabCall =
     func.lookup<NativeFunction<Void Function()>>('grab_call').asFunction();
+final void Function() grabCallAsync = func
+    .lookup<NativeFunction<Void Function()>>('grab_call_async')
+    .asFunction();
 // final void Function(int) testFunc =
 //     func.lookup<NativeFunction<Void Function(Int32)>>('test').asFunction();
 final void Function(Pointer<NativeFunction<IntPtr Function(Pointer<Uint8>)>>)

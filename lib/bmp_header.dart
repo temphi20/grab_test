@@ -39,14 +39,19 @@ class BMPHeader {
     for (int rgb = 0; rgb < 256; rgb++) {
       final int offset = baseHeaderSize + rgb * 4;
 
-      final int red = rgb & 0xE0;
-      final int green = rgb << 3 & 0xE0;
-      final int blue = rgb & 6 & 0xC0;
-
       bData.setUint8(offset + 3, 255); // A
-      bData.setUint8(offset + 2, red); // R
-      bData.setUint8(offset + 1, green); // G
-      bData.setUint8(offset, blue); // B
+      bData.setUint8(offset + 2, offset); // R
+      bData.setUint8(offset + 1, offset); // G
+      bData.setUint8(offset, offset); // B
+
+      // final int red = rgb & 0xE0;
+      // final int green = rgb << 3 & 0xE0;
+      // final int blue = rgb & 6 & 0xC0;
+
+      // bData.setUint8(offset + 3, 255); // A
+      // bData.setUint8(offset + 2, red); // R
+      // bData.setUint8(offset + 1, green); // G
+      // bData.setUint8(offset, blue); // B
     }
   }
 

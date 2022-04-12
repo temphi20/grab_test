@@ -40,9 +40,9 @@ class BMPHeader {
       final int offset = baseHeaderSize + rgb * 4;
 
       bData.setUint8(offset + 3, 255); // A
-      bData.setUint8(offset + 2, offset); // R
-      bData.setUint8(offset + 1, offset); // G
-      bData.setUint8(offset, offset); // B
+      bData.setUint8(offset + 2, rgb); // R
+      bData.setUint8(offset + 1, rgb); // G
+      bData.setUint8(offset, rgb); // B
 
       // final int red = rgb & 0xE0;
       // final int green = rgb << 3 & 0xE0;

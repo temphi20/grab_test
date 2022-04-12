@@ -25,12 +25,14 @@ class GrabPage extends StatefulWidget {
 
 class _GrabPageState extends State<GrabPage> {
   static BMPHeader header = BMPHeader(2592, 2048);
-  Uint8List? ulist;
-  // final Uint8List ulist = Uint8List(1078 + 2592 * 2048);
+  Uint8List? bytes;
+  Uint8List preBytes = BMPHeader(2592, 2048)
+      .appendBitmap(Uint8List.fromList(List.filled(2592 * 2048, 0)));
+  // final Uint8List bytes = Uint8List(1078 + 2592 * 2048);
 
   // void imageUpdate(Uint8List bytes) {
   //   setState(() {
-  //     ulist = bytes;
+  //     bytes = bytes;
   //   });
   // }
 
@@ -45,9 +47,10 @@ class _GrabPageState extends State<GrabPage> {
           BMPHeader(2592, 2048).appendBitmap(result.asTypedList(2592 * 2048)));
       kPrint('memory image succeed');
 
+      // memoryImage.load();
       setState(() {
-        // ulist.setAll(0, memoryImage.bytes);
-        ulist = memoryImage.bytes;
+        // bytes.setAll(0, memoryImage.bytes);
+        bytes = memoryImage.bytes;
       });
       // imageUpdate(memoryImage.bytes);
     } catch (e) {
@@ -71,7 +74,7 @@ class _GrabPageState extends State<GrabPage> {
           kPrint('port open');
         } else if (val is Uint8List) {
           setState(() {
-            ulist = val;
+            bytes = val;
           });
         }
         //   else if (val is int) {
@@ -79,15 +82,15 @@ class _GrabPageState extends State<GrabPage> {
         //     final Uint8List tmp =
         //         Uint8List.fromList(result!.files[val].bytes!.toList());
         //     setState(() {
-        //       // if (ulist == null) {
-        //       //   ulist = result!.files[val].bytes;
+        //       // if (bytes == null) {
+        //       //   bytes = result!.files[val].bytes;
         //       // } else {
-        //       // ulist!.clear();
+        //       // bytes!.clear();
 
-        //       ulist = tmp;
-        //       // ulist!.addAll(result!.files[val].bytes!.toList());
+        //       bytes = tmp;
+        //       // bytes!.addAll(result!.files[val].bytes!.toList());
         //       // }
-        //       // if (result != null) ulist.addAll(iterable) = .;
+        //       // if (result != null) bytes.addAll(iterable) = .;
         //     });
         //   }
       });
@@ -106,7 +109,7 @@ class _GrabPageState extends State<GrabPage> {
     final FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
 
-    Timer.periodic(const Duration(milliseconds: 10), (timer) {
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
       kPrint([timer.tick]);
       if (isStop) {
         timer.cancel();
@@ -116,8 +119,8 @@ class _GrabPageState extends State<GrabPage> {
         // final start = DateTime.now();
         // kPrint('test - ${DateTime.now().difference(start)}');
         // sPort.send(timer.tick % 9);
-        // sPort.send(
-        //     header.appendBitmap(getResultGlobal().asTypedList(2592 * 2048)));
+        sPort.send(
+            header.appendBitmap(getResultGlobal().asTypedList(2592 * 2048)));
         // kPrint('in timer - ${DateTime.now().difference(start)}');
         // getResult(ptr);
         // sPort.send(
@@ -170,20 +173,20 @@ class _GrabPageState extends State<GrabPage> {
       final Uint8List tmp =
           Uint8List.fromList(result!.files[timer.tick % 9].bytes!.toList());
       setState(() {
-        // if (ulist == null) {
-        //   ulist = result!.files[val].bytes;
+        // if (bytes == null) {
+        //   bytes = result!.files[val].bytes;
         // } else {
-        // ulist!.clear();
+        // bytes!.clear();
 
-        ulist = tmp;
-        // ulist!.addAll(result!.files[val].bytes!.toList());
+        bytes = tmp;
+        // bytes!.addAll(result!.files[val].bytes!.toList());
         // }
-        // if (result != null) ulist.addAll(iterable) = .;
+        // if (result != null) bytes.addAll(iterable) = .;
       });
 
       // if (result != null) {
       //   setState(() {
-      //     ulist = result.files[timer.tick % 9].bytes;
+      //     bytes = result.files[timer.tick % 9].bytes;
       //   });
       // }
     });
@@ -222,21 +225,29 @@ class _GrabPageState extends State<GrabPage> {
                 onPressed: () => grab(),
                 child: const Text('GRAB ONE'),
               ),
-              if (ulist != null)
+              if (bytes != null)
                 SizedBox(
                   width: 2592 * 0.4,
                   height: 2048 * 0.4,
                   child: Image.memory(
-                    ulist!,
-                    cacheWidth: 2592,
-                    cacheHeight: 2048,
+                    bytes!,
+                    // frameBuilder:
+                    //     (context, child, frame, wasSynchronouslyLoaded) {
+                    //   return Image.memory(
+                    //     preBytes,
+                    //     // cacheWidth: 2592,
+                    //     // cacheHeight: 2048,
+                    //   );
+                    // },
+                    // cacheWidth: 2592,
+                    // cacheHeight: 2048,
                   ),
                 ),
               // RawImage(
               //   image: ,
               // )
-              // if (Pylon.on(context).imageUList != null)
-              //   RawImage(image: Pylon.on(context).imageUList!),
+              // if (Pylon.on(context).imagebytes != null)
+              //   RawImage(image: Pylon.on(context).imagebytes!),
             ],
           ),
         ),

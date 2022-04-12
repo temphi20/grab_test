@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
+import 'controller.dart';
 import 'func.dart';
 import 'page.dart';
-import 'notifier.dart';
 
 void main() async {
   runApp(const MyApp());
+  Get.put(Controller());
   WidgetsFlutterBinding.ensureInitialized();
   initialize();
 }
@@ -16,17 +17,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ListenableProvider<Notifier>(create: (_) => Notifier())
-        // Provider<Notifier>(create: (_) => Notifier())
-      ],
-      child: MaterialApp(
-        title: 'Pylon Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: GrabPage(),
-      ),
+    return GetMaterialApp(
+      title: 'Pylon Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: GrabPage(),
     );
   }
 }

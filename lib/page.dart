@@ -7,11 +7,12 @@ import 'dart:ui' as ui;
 import 'package:ffi/ffi.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'bmp_header.dart';
 import 'func.dart';
 import 'function.dart';
-import 'notifier.dart';
+import 'controller.dart';
 
 late Isolate isolate;
 late SendPort sendPort;
@@ -29,7 +30,7 @@ class GrabPage extends StatelessWidget {
   //   });
   // }
 
-  void grab(Notifier of) async {
+  void grab() async {
     try {
       // kPrint(const Color(0xffad2300).value);
       final Pointer<Uint8> result = calloc.allocate(2592 * 2048);
@@ -38,14 +39,15 @@ class GrabPage extends StatelessWidget {
       kPrint('memory image succeed');
 
       // memoryImage.load();
-      of.imageUpdate(header.appendBitmap(result.asTypedList(2592 * 2048)));
+      Controller.to
+          .imageUpdate(header.appendBitmap(result.asTypedList(2592 * 2048)));
       // imageUpdate(memoryImage.bytes);
     } catch (e) {
       kPrint('grab: $e');
     }
   }
 
-  void background(Notifier of) async {
+  void background() async {
     try {
       kPrint('in call');
       final ReceivePort receivePort = ReceivePort();
@@ -60,7 +62,7 @@ class GrabPage extends StatelessWidget {
           sendPort = val;
           kPrint('port open');
         } else if (val is Uint8List) {
-          of.imageUpdate(val);
+          Controller.to.imageUpdate(val);
         }
         //   else if (val is int) {
         //     kPrint('<< $val');
@@ -148,7 +150,7 @@ class GrabPage extends StatelessWidget {
     isolate.kill(priority: Isolate.immediate);
   }
 
-  void filePicker(Notifier of) async {
+  void filePicker(Controller to) async {
     final FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
 
@@ -157,7 +159,7 @@ class GrabPage extends StatelessWidget {
 
       final Uint8List tmp =
           Uint8List.fromList(result!.files[timer.tick % 9].bytes!.toList());
-      of.imageUpdate(tmp);
+      to.imageUpdate(tmp);
 
       // if (result != null) {
       //   setState(() {
@@ -189,25 +191,25 @@ class GrabPage extends StatelessWidget {
               // TextButton(onPressed: initialize, child: const Text('INITIALIZE')),
               // TextButton(onPressed: terminate, child: const Text('TERMINATE')),
               TextButton(
-                onPressed: () => background(Notifier.of(context)),
+                onPressed: background,
                 child: const Text('GRAB START'),
               ),
               TextButton(onPressed: startRead, child: const Text('START READ')),
               TextButton(onPressed: isolateStop, child: const Text('STOP')),
               TextButton(
-                onPressed: () => filePicker(Notifier.of(context)),
+                onPressed: () => filePicker(Controller.to),
                 child: const Text('Picker Test'),
               ),
               TextButton(
-                onPressed: () => grab(Notifier.of(context)),
+                onPressed: grab,
                 child: const Text('GRAB ONE'),
               ),
-              if (Notifier.on(context).bytes.isNotEmpty)
-                SizedBox(
-                  width: 2592 * 0.4,
-                  height: 2048 * 0.4,
-                  child: Image.memory(Notifier.on(context).bytes),
-                ),
+              // if (Controller.to.bytes.value != null)
+              Obx(() => SizedBox(
+                    width: 2592 * 0.4,
+                    height: 2048 * 0.4,
+                    child: Image.memory(Controller.to.bytes.value),
+                  )),
               // RawImage(
               //   image: ,
               // )

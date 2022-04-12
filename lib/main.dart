@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'func.dart';
 import 'page.dart';
+import 'notifier.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -14,11 +16,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pylon Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const GrabPage(),
+    return MultiProvider(
+      providers: [
+        ListenableProvider<Notifier>(create: (_) => Notifier())
+        // Provider<Notifier>(create: (_) => Notifier())
+      ],
+      child: MaterialApp(
+        title: 'Pylon Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: GrabPage(),
+      ),
     );
   }
 }

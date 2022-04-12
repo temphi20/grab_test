@@ -6,28 +6,21 @@ import 'dart:ui' as ui;
 
 import 'package:ffi/ffi.dart';
 import 'package:file_picker/file_picker.dart';
-// import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 
 import 'bmp_header.dart';
 import 'func.dart';
 import 'function.dart';
+import 'notifier.dart';
 
 late Isolate isolate;
 late SendPort sendPort;
 
-class GrabPage extends StatefulWidget {
-  const GrabPage({Key? key}) : super(key: key);
-
-  @override
-  State<GrabPage> createState() => _GrabPageState();
-}
-
-class _GrabPageState extends State<GrabPage> {
+class GrabPage extends StatelessWidget {
   static BMPHeader header = BMPHeader(2592, 2048);
-  Uint8List? bytes;
-  Uint8List preBytes = BMPHeader(2592, 2048)
-      .appendBitmap(Uint8List.fromList(List.filled(2592 * 2048, 0)));
+  // Uint8List? bytes;
+  // Uint8List preBytes = BMPHeader(2592, 2048)
+  //     .appendBitmap(Uint8List.fromList(List.filled(2592 * 2048, 0)));
   // final Uint8List bytes = Uint8List(1078 + 2592 * 2048);
 
   // void imageUpdate(Uint8List bytes) {
@@ -36,29 +29,23 @@ class _GrabPageState extends State<GrabPage> {
   //   });
   // }
 
-  void grab() async {
+  void grab(Notifier of) async {
     try {
       // kPrint(const Color(0xffad2300).value);
       final Pointer<Uint8> result = calloc.allocate(2592 * 2048);
       final int size = grabOne(result);
       kPrint(size);
-      kPrint(result);
-      final MemoryImage memoryImage = MemoryImage(
-          BMPHeader(2592, 2048).appendBitmap(result.asTypedList(2592 * 2048)));
       kPrint('memory image succeed');
 
       // memoryImage.load();
-      setState(() {
-        // bytes.setAll(0, memoryImage.bytes);
-        bytes = memoryImage.bytes;
-      });
+      of.imageUpdate(header.appendBitmap(result.asTypedList(2592 * 2048)));
       // imageUpdate(memoryImage.bytes);
     } catch (e) {
       kPrint('grab: $e');
     }
   }
 
-  void background() async {
+  void background(Notifier of) async {
     try {
       kPrint('in call');
       final ReceivePort receivePort = ReceivePort();
@@ -73,9 +60,7 @@ class _GrabPageState extends State<GrabPage> {
           sendPort = val;
           kPrint('port open');
         } else if (val is Uint8List) {
-          setState(() {
-            bytes = val;
-          });
+          of.imageUpdate(val);
         }
         //   else if (val is int) {
         //     kPrint('<< $val');
@@ -163,7 +148,7 @@ class _GrabPageState extends State<GrabPage> {
     isolate.kill(priority: Isolate.immediate);
   }
 
-  void filePicker() async {
+  void filePicker(Notifier of) async {
     final FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
 
@@ -172,17 +157,7 @@ class _GrabPageState extends State<GrabPage> {
 
       final Uint8List tmp =
           Uint8List.fromList(result!.files[timer.tick % 9].bytes!.toList());
-      setState(() {
-        // if (bytes == null) {
-        //   bytes = result!.files[val].bytes;
-        // } else {
-        // bytes!.clear();
-
-        bytes = tmp;
-        // bytes!.addAll(result!.files[val].bytes!.toList());
-        // }
-        // if (result != null) bytes.addAll(iterable) = .;
-      });
+      of.imageUpdate(tmp);
 
       // if (result != null) {
       //   setState(() {
@@ -214,34 +189,24 @@ class _GrabPageState extends State<GrabPage> {
               // TextButton(onPressed: initialize, child: const Text('INITIALIZE')),
               // TextButton(onPressed: terminate, child: const Text('TERMINATE')),
               TextButton(
-                onPressed: () => background(),
+                onPressed: () => background(Notifier.of(context)),
                 child: const Text('GRAB START'),
               ),
               TextButton(onPressed: startRead, child: const Text('START READ')),
               TextButton(onPressed: isolateStop, child: const Text('STOP')),
               TextButton(
-                  onPressed: filePicker, child: const Text('Picker Test')),
+                onPressed: () => filePicker(Notifier.of(context)),
+                child: const Text('Picker Test'),
+              ),
               TextButton(
-                onPressed: () => grab(),
+                onPressed: () => grab(Notifier.of(context)),
                 child: const Text('GRAB ONE'),
               ),
-              if (bytes != null)
+              if (Notifier.on(context).bytes.isNotEmpty)
                 SizedBox(
                   width: 2592 * 0.4,
                   height: 2048 * 0.4,
-                  child: Image.memory(
-                    bytes!,
-                    // frameBuilder:
-                    //     (context, child, frame, wasSynchronouslyLoaded) {
-                    //   return Image.memory(
-                    //     preBytes,
-                    //     // cacheWidth: 2592,
-                    //     // cacheHeight: 2048,
-                    //   );
-                    // },
-                    // cacheWidth: 2592,
-                    // cacheHeight: 2048,
-                  ),
+                  child: Image.memory(Notifier.on(context).bytes),
                 ),
               // RawImage(
               //   image: ,

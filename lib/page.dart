@@ -28,6 +28,7 @@ class _GrabPageState extends State<GrabPage> {
   Uint8List? bytes;
   Uint8List preBytes = BMPHeader(2592, 2048)
       .appendBitmap(Uint8List.fromList(List.filled(2592 * 2048, 0)));
+  bool _isRead = false, _isStop = false;
   // final Uint8List bytes = Uint8List(1078 + 2592 * 2048);
 
   // void imageUpdate(Uint8List bytes) {
@@ -56,6 +57,24 @@ class _GrabPageState extends State<GrabPage> {
     } catch (e) {
       kPrint('grab: $e');
     }
+  }
+
+  void test() async {
+    kPrint('in call');
+    grabSync();
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      kPrint([timer.tick]);
+      if (_isStop) {
+        timer.cancel();
+      }
+      if (_isRead) {
+        setState(() {
+          bytes =
+              header.appendBitmap(getResultGlobal().asTypedList(2592 * 2048));
+        });
+      }
+    });
+    kPrint('set timer');
   }
 
   void background() async {
@@ -148,15 +167,33 @@ class _GrabPageState extends State<GrabPage> {
     // kPrint('start grab');
   }
 
+  void testRead() {
+    kPrint('read btn click');
+    _isRead = true;
+    kPrint('success send');
+  }
+
+  void testStop() {
+    kPrint('stop btn click');
+    _isRead = false;
+    _isStop = true;
+    stop();
+    close();
+  }
+
   void startRead() {
     kPrint('read btn click');
     kPrint('start send');
+    // setState(() {
+    _isRead = true;
+    // });
     sendPort.send({"isRead": true});
     kPrint('success send');
   }
 
   void isolateStop() {
     kPrint('stop btn click');
+    _isStop = false;
     sendPort.send({"isRead": false, "isStop": true});
     stop();
     close();
@@ -214,34 +251,22 @@ class _GrabPageState extends State<GrabPage> {
               // TextButton(onPressed: initialize, child: const Text('INITIALIZE')),
               // TextButton(onPressed: terminate, child: const Text('TERMINATE')),
               TextButton(
-                onPressed: () => background(),
-                child: const Text('GRAB START'),
-              ),
+                  onPressed: background, child: const Text('GRAB START')),
+              TextButton(
+                  onPressed: test, child: const Text('GRAB START (TEST)')),
+              TextButton(
+                  onPressed: testRead, child: const Text('START READ (TEST)')),
+              TextButton(onPressed: testStop, child: const Text('STOP (TEST)')),
               TextButton(onPressed: startRead, child: const Text('START READ')),
               TextButton(onPressed: isolateStop, child: const Text('STOP')),
               TextButton(
                   onPressed: filePicker, child: const Text('Picker Test')),
-              TextButton(
-                onPressed: () => grab(),
-                child: const Text('GRAB ONE'),
-              ),
+              TextButton(onPressed: grab, child: const Text('GRAB ONE')),
               if (bytes != null)
                 SizedBox(
                   width: 2592 * 0.4,
                   height: 2048 * 0.4,
-                  child: Image.memory(
-                    bytes!,
-                    // frameBuilder:
-                    //     (context, child, frame, wasSynchronouslyLoaded) {
-                    //   return Image.memory(
-                    //     preBytes,
-                    //     // cacheWidth: 2592,
-                    //     // cacheHeight: 2048,
-                    //   );
-                    // },
-                    // cacheWidth: 2592,
-                    // cacheHeight: 2048,
-                  ),
+                  child: Image.memory(bytes!),
                 ),
               // RawImage(
               //   image: ,

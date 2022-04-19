@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(test LANGUAGES CXX)
+project(gige_view LANGUAGES CXX)
 
-set(BINARY_NAME "test")
+set(BINARY_NAME "gige_view")
 
 cmake_policy(SET CMP0063 NEW)
 

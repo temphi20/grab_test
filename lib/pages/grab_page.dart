@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -23,10 +24,35 @@ class GrabPage extends StatelessWidget {
     }
   }
 
-  void grabRetrieve(UINotifier uiNotifier) async {
+  void grabRetrieve() {
     kPrint('in call');
     Pylon.instance.grabRetrieve();
     // Pylon.instance.setCallback();
+
+    // Timer.periodic(
+    //   const Duration(milliseconds: 10),
+    //   (timer) {
+    //     uiNotifier.imageUpdate(Pylon.instance.getResultGlobal());
+    //   },
+    // );
+    // kPrint('set timer');
+  }
+
+  // void grabRetrieve(UINotifier uiNotifier) async {
+  //   kPrint('in call');
+  //   Pylon.instance.grabRetrieve();
+  //   // Pylon.instance.setCallback();
+
+  //   // Timer.periodic(
+  //   //   const Duration(milliseconds: 10),
+  //   //   (timer) {
+  //   //     uiNotifier.imageUpdate(Pylon.instance.getResultGlobal());
+  //   //   },
+  //   // );
+  //   // kPrint('set timer');
+  // }
+
+  void read(UINotifier uiNotifier) {
     Timer.periodic(
       const Duration(milliseconds: 10),
       (timer) {
@@ -79,7 +105,13 @@ class GrabPage extends StatelessWidget {
             PaneItemAction(
               icon: const Icon(FluentIcons.timer),
               title: const Text('타이머 테스트 시작'),
-              onTap: () => grabRetrieve(UINotifier.of(context)),
+              onTap: grabRetrieve,
+              // onTap: () => grabRetrieve(UINotifier.of(context)),
+            ),
+            PaneItemAction(
+              icon: const Icon(FluentIcons.read),
+              title: const Text('타이머 읽기 시작'),
+              onTap: () => read(UINotifier.of(context)),
             ),
             PaneItemAction(
               icon: const Icon(FluentIcons.video),

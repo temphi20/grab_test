@@ -1,8 +1,8 @@
-#include "func.h"
-#include "ImageCreator.h"
-#include <memory.h>
-#include <thread>
-#include <future>
+#include "PylonDll.h"
+//#include "ImageCreator.h"
+//
+//#include <thread>
+//#include <future>
 
 using namespace Pylon;
 using namespace std;
@@ -11,6 +11,7 @@ CRITICAL_SECTION section;
 
 FUNC_API uint8_t* Result = (uint8_t*)calloc(Width * Height, sizeof(uint8_t));
 thread* ThreadPtr;
+CInstantCamera Camera;
 
 void grab_one(uint8_t* ptrResult) {
 	PylonInitialize();
@@ -50,7 +51,9 @@ void grab_retrieve() {
 				if (ptrGrabResult->GrabSucceeded()) {
 					EnterCriticalSection(&section);
 					memcpy(Result, (uint8_t*)ptrGrabResult->GetBuffer(), Width * Height);
+					cout << Result[0] << endl;
 					LeaveCriticalSection(&section);
+					//Slepp(6);
 				}
 				else {
 					cout << "error[" << ptrGrabResult->GetErrorCode() << "] " << ptrGrabResult->GetErrorDescription() << endl;
@@ -60,9 +63,6 @@ void grab_retrieve() {
 
 		t.detach();
 		ThreadPtr = &t;
-		//Thread.swap(t);
-		//t.joinable();
-		//Thread.detach();
 		cout << "thread test" << endl;
 	}
 	catch (const GenericException& e)
@@ -77,7 +77,7 @@ uint8_t* get_result_global() {
 
 void set_callback(intptr_t(*callback)(uint8_t*)) {
 	cout << "Callback cb - " << callback << endl;
-	Callback = callback;
+	CallbackFunction = callback;
 }
 
 void __stdcall grab_callback() {
@@ -93,7 +93,7 @@ void __stdcall grab_callback() {
 				if (ptrGrabResult->GrabSucceeded()) {
 					//EnterCriticalSection(&section);
 					//memcpy(Result, (uint8_t*)ptrGrabResult->GetBuffer(), Width * Height);
-					Callback((uint8_t*)ptrGrabResult->GetBuffer());
+					CallbackFunction((uint8_t*)ptrGrabResult->GetBuffer());
 					//LeaveCriticalSection(&section);
 				}
 				else {
@@ -135,3 +135,73 @@ void stop() {
 	ThreadPtr->join();
 	cout << "stop" << endl;
 }
+
+//#include "PylonDll.h"
+//
+//using namespace std;
+//using namespace Pylon;
+//
+//intptr_t(*CallbackFunction)(uint8_t*);
+//thread* Thread;
+//CInstantCamera Camera;
+//
+//void PylonWork::StartWork() {
+//    PylonWork::running_work_ = new PylonWork();
+//    PylonWork::running_work_->Start();
+//}
+//
+//void PylonWork::StopWork() {
+//    PylonWork::running_work_->Stop();
+//    delete PylonWork::running_work_;
+//    PylonWork::running_work_ = nullptr;
+//}
+//
+//
+//void PylonWork::Start() {
+//    printf("C Da:  Starting SimulateWork.\n");
+//    PylonInitialize();
+//    Camera.Attach(CTlFactory::GetInstance().CreateFirstDevice());
+//    Camera.StartGrabbing();
+//    printf("C Da:   Starting worker threads.\n");
+//    Thread = new thread(Start_Callback);
+//    printf("C Da:  Started SimulateWork.\n");
+//}
+//
+//void PylonWork::Stop() {
+//    printf("C Da:  Stopping SimulateWork.\n");
+//    Camera.StopGrabbing();
+//    printf("C Da:   Waiting for worker threads to finish.\n");
+//    Thread->join();
+//    delete Thread;
+//    Thread = nullptr;
+//    printf("C Da:  Stopped SimulateWork.\n");
+//}
+//
+//
+//void StartWork() {
+//    PylonWork::StartWork();
+//}
+//void StopWork() {
+//    PylonWork::StopWork();
+//}
+//
+//void Start_Callback() {
+//    CGrabResultPtr ptrGrabResult;
+//
+//    while (Camera.IsGrabbing()) {
+//        Camera.RetrieveResult(5000, ptrGrabResult, TimeoutHandling_ThrowException);
+//        if (ptrGrabResult->GrabSucceeded()) {
+//            //EnterCriticalSection(&section);
+//            CallbackFunction((uint8_t*)ptrGrabResult->GetBuffer());
+//            Sleep(8);
+//            //LeaveCriticalSection(&section);
+//        }
+//        else {
+//            cout << "error[" << ptrGrabResult->GetErrorCode() << "] " << ptrGrabResult->GetErrorDescription() << endl;
+//        }
+//    }
+//}
+//
+//void RegisterCallback(intptr_t(*callback)(uint8_t*)) {
+//    CallbackFunction = callback;
+//}

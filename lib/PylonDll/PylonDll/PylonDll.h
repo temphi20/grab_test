@@ -5,7 +5,6 @@
 #include <GenICam.h>
 //#include <PylonIncludes.h>
 
-
 using namespace std;
 using namespace Pylon;
 

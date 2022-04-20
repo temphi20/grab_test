@@ -10,12 +10,12 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [Provider(create: (_) => UINotifier())],
+      providers: [ListenableProvider<UINotifier>(create: (_) => UINotifier())],
       child: FluentApp(
         title: 'Pylon Demo',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(),
-        home: GrabPage(),
+        home: const GrabPage(),
       ),
     );
   }

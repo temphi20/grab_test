@@ -9,18 +9,19 @@
 #define FUNC_API __declspec(dllimport)
 #endif
 
+extern const int Width = 2592;
+extern const int Height = 2048;
+extern Pylon::CInstantCamera Camera;
 
-intptr_t(*callbackFunction)(uint8_t*);
+intptr_t(*Callback)(uint8_t*);
 
 FUNC_API void grab_one(uint8_t*);
-FUNC_API void grab_retrieve(uint8_t*);
+FUNC_API void grab_retrieve();
 
-FUNC_API void SetCallbackFunction(intptr_t(*callback)(uint8_t*));
-FUNC_API void __stdcall grab_call();
-FUNC_API void __stdcall grab_call_async();
+FUNC_API void set_callback(intptr_t(*callback)(uint8_t*));
+FUNC_API void __stdcall grab_callback();
 
-FUNC_API void grab_sync();
-FUNC_API void get_result(uint8_t*);
+//FUNC_API void get_result(uint8_t*);
 FUNC_API uint8_t* get_result_global();
 
 FUNC_API void initialize();

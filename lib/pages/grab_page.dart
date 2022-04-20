@@ -8,6 +8,8 @@ import '../api/pylon.dart';
 import '../function.dart';
 import '../notifier/ui_notifier.dart';
 
+BuildContext? buildContext;
+
 class GrabPage extends StatelessWidget {
   const GrabPage({Key? key}) : super(key: key);
 
@@ -21,9 +23,10 @@ class GrabPage extends StatelessWidget {
     }
   }
 
-  void grabRe(UINotifier uiNotifier) async {
+  void grabRetrieve(UINotifier uiNotifier) async {
     kPrint('in call');
-    Pylon.instance.grabSync();
+    Pylon.instance.grabRetrieve();
+    // Pylon.instance.setCallback();
     Timer.periodic(
       const Duration(milliseconds: 10),
       (timer) {
@@ -31,6 +34,22 @@ class GrabPage extends StatelessWidget {
       },
     );
     kPrint('set timer');
+  }
+
+  void grabCallback(BuildContext context) async {
+    buildContext = context;
+    Pylon.instance.setCallback(
+        Pointer.fromFunction<IntPtr Function(Pointer<Uint8>)>(callback, 0));
+    kPrint('set callback');
+    Pylon.instance.grabCallback();
+  }
+
+  static int callback(Pointer<Uint8> ptr) {
+    kPrint('callback [${ptr.asTypedList(10).elementAt(0)}]');
+    if (buildContext != null) {
+      UINotifier.of(buildContext!).imageUpdate(ptr);
+    }
+    return 0;
   }
 
   void stop() {
@@ -54,32 +73,37 @@ class GrabPage extends StatelessWidget {
           items: [
             PaneItemAction(
               icon: const Icon(FluentIcons.camera),
-              title: 'sdf',
+              title: const Text('한 장 찍기'),
               onTap: () => grabOne(UINotifier.of(context)),
             ),
             PaneItemAction(
+              icon: const Icon(FluentIcons.timer),
+              title: const Text('타이머 테스트 시작'),
+              onTap: () => grabRetrieve(UINotifier.of(context)),
+            ),
+            PaneItemAction(
               icon: const Icon(FluentIcons.video),
-              title: 'sdf',
-              onTap: () => grabRe(UINotifier.of(context)),
+              title: const Text('콜백 테스트 시작'),
+              onTap: () => grabCallback(context),
             ),
             PaneItemAction(
               icon: const Icon(FluentIcons.stop),
-              title: '정지',
+              title: const Text('정지'),
               onTap: stop,
             ),
           ],
         ),
-        content: ListView(
-          shrinkWrap: true,
-          controller: ScrollController(),
-          physics: const ScrollPhysics(),
-          children: <Widget>[
-            if (UINotifier.on(context).painter != null)
-              SizedBox(
-                width: 2592 * 0.4,
-                height: 2048 * 0.4,
-                child: CustomPaint(painter: UINotifier.on(context).painter),
+        content: NavigationBody(
+          index: 0,
+          children: [
+            SizedBox(
+              width: Pylon.width,
+              height: Pylon.height,
+              child: CustomPaint(
+                painter: UINotifier.on(context).painter,
+                size: const Size(2592, 2048),
               ),
+            ),
           ],
         ),
       ),
